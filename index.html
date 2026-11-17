@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>アブレーション虎の巻</title>
+<style>
+:root{
+  --bg:#f3f4f6;--card:#fff;--text:#1f2937;--sub:#6b7280;--line:#e5e7eb;
+  --cart:#2563eb;--cart-bg:#eff6ff;--lab:#059669;--lab-bg:#ecfdf5;
+  --primary:#1d4ed8;--danger:#dc2626;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic",Meiryo,sans-serif;font-size:16px;line-height:1.5}
+button{font:inherit;cursor:pointer;min-height:40px;padding:6px 14px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--text)}
+button:active{opacity:.7}
+button.primary{background:var(--primary);border-color:var(--primary);color:#fff}
+button.ghost{background:transparent}
+button.danger{color:var(--danger);border-color:var(--danger)}
+header.top{position:sticky;top:0;z-index:10;display:flex;align-items:center;gap:12px;padding:10px 16px;background:#111827;color:#fff}
+header.top h1{flex:1;margin:0;font-size:18px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+header.top button.ghost{color:#fff;border-color:#4b5563}
+.ver{font-size:12px;color:#9ca3af;border:1px solid #4b5563;border-radius:10px;padding:1px 8px}
+main{max-width:1100px;margin:0 auto;padding:16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-bottom:20px}
+.case-card{display:flex;flex-direction:column;gap:4px;align-items:flex-start;text-align:left;padding:16px;min-height:96px;background:var(--card);border:1px solid var(--line);border-radius:12px}
+.case-card b{font-size:18px}
+.case-card small{color:var(--sub)}
+.case-card.add{align-items:center;justify-content:center;color:var(--primary);border-style:dashed}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:16px}
+.card h2{margin:0 0 8px;font-size:16px}
+.hint{color:var(--sub);font-size:13px}
+.modebar{position:sticky;top:56px;z-index:9;display:flex;justify-content:center;padding:8px;background:var(--bg)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff}
+.seg button{border:0;border-radius:0;min-width:84px}
+.seg button.on{background:var(--primary);color:#fff}
+.step{background:var(--card);border:1px solid var(--line);border-radius:12px;margin-bottom:14px;overflow:hidden}
+.step-head{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line);background:#f9fafb}
+.step-no{flex:none;width:28px;height:28px;border-radius:50%;background:#111827;color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px}
+.step-head input{flex:1;min-width:0;font:inherit;font-weight:600;border:1px solid transparent;border-radius:6px;padding:6px 8px;background:transparent}
+.step-head input:focus{border-color:var(--line);background:#fff;outline:none}
+.step-head button{min-height:34px;padding:2px 10px}
+.cols{display:grid;gap:0}
+.cols.both{grid-template-columns:1fr 1fr}
+@media(max-width:720px){.cols.both{grid-template-columns:1fr}}
+.col{padding:10px 12px}
+.col label{display:block;font-size:13px;font-weight:700;margin-bottom:4px}
+.col.cart{background:var(--cart-bg)}.col.cart label{color:var(--cart)}
+.col.lab{background:var(--lab-bg)}.col.lab label{color:var(--lab)}
+textarea{width:100%;font:inherit;line-height:1.55;padding:8px 10px;border:1px solid var(--line);border-radius:8px;resize:none;min-height:84px;background:#fff;overflow:hidden}
+textarea.paste{min-height:140px;overflow:auto;resize:vertical}
+.add-step{width:100%;margin-bottom:16px;border-style:dashed;color:var(--primary)}
+.memo{display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;padding:10px 0;border-top:1px solid var(--line)}
+.memo:first-of-type{border-top:0}
+.mtext{flex:1 1 260px;white-space:pre-wrap;word-break:break-word}
+.mtext small{display:block;color:var(--sub);font-size:12px}
+.mact{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.mact select{font:inherit;min-height:40px;border:1px solid var(--line);border-radius:8px;padding:0 6px;max-width:180px}
+details summary{cursor:pointer;font-weight:600}
+.hist{margin:8px 0 0;padding:0;list-style:none;font-size:14px}
+.hist li{padding:4px 0;border-top:1px solid var(--line)}
+.hist time{color:var(--sub);margin-right:8px}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+pre.ex{background:#f9fafb;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:13px;margin:6px 0 10px;white-space:pre-wrap}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:50;display:flex;align-items:center;justify-content:center;padding:16px}
+.modal{background:#fff;border-radius:14px;max-width:760px;width:100%;max-height:88vh;display:flex;flex-direction:column}
+.modal-body{padding:16px;overflow:auto}
+.modal-foot{padding:12px 16px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:8px}
+.pv-step{border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin-bottom:10px}
+.pv-step b{display:block;margin-bottom:4px}
+.badge{font-size:11px;padding:1px 7px;border-radius:10px;margin-left:6px;vertical-align:middle}
+.badge.new{background:#fef3c7;color:#92400e}
+.badge.add{background:#e5e7eb;color:#374151}
+.pv-line{white-space:pre-wrap;font-size:14px;padding:2px 0 2px 8px;border-left:3px solid}
+.pv-line.cart{border-color:var(--cart)}.pv-line.lab{border-color:var(--lab)}
+.pv-line.memo{border-color:#9ca3af}
+.pv-tag{font-size:12px;font-weight:700;margin-right:4px}
+.pv-tag.cart{color:var(--cart)}.pv-tag.lab{color:var(--lab)}
+.btnlink{display:inline-flex;align-items:center;min-height:40px;padding:6px 14px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--text);text-decoration:none}
+.btnlink.primary{background:var(--primary);border-color:var(--primary);color:#fff}
+.cnote{display:flex;gap:6px;align-items:flex-start;margin-top:6px;padding:6px 8px;border-radius:8px;background:#fffbeb;border:1px solid #fcd34d}
+.ctag{flex:none;font-size:11px;font-weight:700;color:#92400e;background:#fde68a;border-radius:8px;padding:1px 7px;margin-top:2px}
+.ctext{flex:1;white-space:pre-wrap;word-break:break-word;font-size:14px}
+.cnote button{min-height:30px;padding:0 8px}
+.pv-line.note{border-color:#f59e0b;background:#fffbeb}
+.pv-tag.note{color:#92400e}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="modal-root"></div>
+<script id="seed" type="application/json">{"stamp":0,"data":null}</script>
+<script>
+const APP_VERSION='v2.2';
+const LS_KEY='ablation_manual_v1';
+const LS_UI='ablation_manual_ui_v1';
+const LS_URL='ablation_manual_claude_url';
+const LS_DRAFT='ablation_manual_draft_v1';
+const TEMPLATE_STEPS=['準備・セッティング','穿刺・シース挿入','カテーテル留置','マッピング','アブレーション','効果判定(誘発・確認)','終了・撤収'];
+const DEFAULT_CASES=['心房細動','心房頻拍','PVC','心室頻拍','WPW'];
+
+/* ---------- ベース手順(叩き台。数値・設定値は施設ルールに合わせて編集) ---------- */
+const L=(...a)=>a.join('\n');
+const BASE_COMMON={
+ '準備・セッティング':{
+  cart:L('・カルトシステム起動、症例の新規作成(患者情報は院内ルールに従う)','・体表パッチ・基準パッチの貼付位置の確認','・使用カテーテルの接続ケーブル・インターフェースの確認','・灌流ポンプ・灌流ラインのエア抜き'),
+  lab:L('・ポリグラフ起動、症例登録、チャンネルラベル設定','・体表心電図・心内電位の入力確認','・刺激装置の動作確認','・アブレーション装置の動作確認、対極板の貼付確認','・除細動器・救急カート・鎮静モニタの確認','・使用物品(シース、カテーテル、穿刺針)の準備確認')},
+ '穿刺・シース挿入':{
+  cart:L('・穿刺中は操作なし(待機)','・シース留置後、カテーテルをカルトに接続する準備'),
+  lab:L('・穿刺・シース挿入のタイミングを術者に確認','・ヘパリン投与のタイミングとACT測定(目標値は施設ルールに従う)','・ACTの測定間隔と値を記録')},
+ 'カテーテル留置':{
+  cart:L('・カテーテルの表示確認','・基準カテーテル(CS等)の位置確認と基準の設定','・透視でカテーテル位置を確認しながらジオメトリ作成を開始'),
+  lab:L('・CS・RV・His等のカテーテルをポリグラフに接続し、電位が出ているか確認','・ペーシング閾値の確認','・基本計測(基本周期、AH/HV等)を記録')},
+ 'マッピング':{
+  cart:L('・マップの種類(アクティベーション/ボルテージ/ペースマップ)を術者に確認','・取り込み条件(ウィンドウ、基準、注釈、許容範囲)を設定','・マップ点の密度、欠損部の確認','・ずれが出たら基準の再確認・再取り込み'),
+  lab:L('・マッピングカテーテル電位の表示・フィルタ・ゲイン調整','・ペーシング下でマッピングする場合は、刺激装置の出力・周期を術者の指示で設定','・必要時の誘発(刺激プロトコル)の準備')},
+ 'アブレーション':{
+  cart:L('・アブレーションタグ(位置・時間・出力)の設定と表示確認','・タグ基準(最小接触時間、出力)は施設ルールに従う','・タグ間隔の目視確認'),
+  lab:L('・アブレーション装置の設定(出力、温度上限、灌流量)を術者の指示で設定し、読み上げて確認','・通電開始/終了のコール','・通電中のインピーダンス・温度・出力のモニタ','・通電中の電位変化・不整脈の変化を記録')},
+ '効果判定(誘発・確認)':{
+  cart:L('・通電後の再マップ(ボルテージ/アクティベーション)','・ブロックラインの確認(ギャップの検索)'),
+  lab:L('・刺激プロトコルによる誘発・伝導確認','・必要時のイソプロテレノール・ATP等の準備と投与タイミングの確認','・結果(誘発の有無、ブロック確認)の記録')},
+ '終了・撤収':{
+  cart:L('・最終マップの保存、症例データのバックアップ','・カテーテル・パッチの取り外し、システムのクローズ'),
+  lab:L('・波形・イベントの最終保存、レポート出力','・ACTの確認(プロタミン投与は施設ルール)','・シース抜去・止血の確認','・物品使用実績(カテーテル・シース)の記録')}
+};
+/* 症例別の追加項目(共通手順の後ろに追記される) */
+const BASE_CASE={
+ '心房細動':{
+  'マッピング':{cart:L('【AF】','・左房ジオメトリ作成(肺静脈、左心耳、僧帽弁輪)','・肺静脈の入口位置が分かるように表示','・食道温プローブを使う場合は位置をタグで記録'),lab:L('【AF】','・食道温モニタの接続・表示確認')},
+  'アブレーション':{cart:L('【AF】','・肺静脈隔離のライン(同側肺静脈を一括で囲む)を表示','・ラインの連続性(タグの隙間)を確認'),lab:L('【AF】','・食道温の上昇を監視し、術者へコール')},
+  '効果判定(誘発・確認)':{cart:L('【AF】','・肺静脈の電位消失を再マップで確認'),lab:L('【AF】','・肺静脈のエントランスブロック・イグジットブロックを確認','・ATP・イソプロテレノール負荷による再伝導の確認')}},
+ '心房頻拍':{
+  'マッピング':{cart:L('【AT】','・頻拍周期に対するマップのカバー率を確認','・最早部位・最遅部位・旋回の有無を確認'),lab:L('【AT】','・頻拍の周期と心房の興奮順序を記録','・エントレインメントペーシングの出力・周期を術者の指示で設定')},
+  'アブレーション':{cart:L('【AT】','・最早部位または峡部を標的にタグ'),lab:L('【AT】','・通電中の頻拍周期の変化・停止を記録')}},
+ 'PVC':{
+  'マッピング':{cart:L('【PVC】','・PVC時のアクティベーションマップ(体表QRSに対する先行度)','・ペースマップ(体表波形の一致度)'),lab:L('【PVC】','・体表12誘導の波形をポリグラフに表示し、PVC波形を基準として保存','・PVCが出ない場合の誘発(イソプロテレノール、ペーシング)の準備')},
+  'アブレーション':{cart:L('【PVC】','・先行度が最も早い部位を標的にタグ'),lab:L('【PVC】','・通電中のPVC頻度の変化を記録')}},
+ '心室頻拍':{
+  'マッピング':{cart:L('【VT】','・ボルテージマップ(瘢痕・境界領域)','・遅延電位・異常電位(LAVA等)の注釈','・アクティベーションマップ(旋回路の確認)'),lab:L('【VT】','・血圧など血行動態モニタの確認','・除細動器の待機・パッド貼付の確認','・プログラム刺激・エントレインメントの設定(術者の指示)','・誘発したVTの波形・周期を記録')},
+  'アブレーション':{cart:L('【VT】','・標的部位(峡部、異常電位部位)のタグ','・瘢痕均質化を行う場合は範囲を表示'),lab:L('【VT】','・VT中の通電時は血行動態の変化を監視し、術者へコール')},
+  '効果判定(誘発・確認)':{cart:L('【VT】','・再マップで異常電位の残存を確認'),lab:L('【VT】','・プログラム刺激による再誘発の確認と記録')}},
+ 'WPW':{
+  'マッピング':{cart:L('【WPW】','・僧帽弁輪または三尖弁輪のジオメトリ作成','・順行性・逆行性それぞれの最早心室/心房興奮部位をマップ'),lab:L('【WPW】','・デルタ波の有無・形、順行/逆行伝導の評価','・心房・心室ペーシングの設定(術者の指示)')},
+  'アブレーション':{cart:L('【WPW】','・副伝導路の部位をタグ','・房室結節に近い場合は位置関係を確認'),lab:L('【WPW】','・通電中のデルタ波の消失、房室伝導の変化(ブロック)を監視し、術者へコール')},
+  '効果判定(誘発・確認)':{cart:L('【WPW】','・通電部位の再確認'),lab:L('【WPW】','・順行性・逆行性の副伝導路伝導が消失していることを確認','・誘発(心房/心室刺激、イソプロテレノール)での再発の確認')}}
+};
+function baseFor(caseName,stepName){
+  const c=BASE_COMMON[stepName]||{cart:'',lab:''};
+  const o=(BASE_CASE[caseName]||{})[stepName];
+  return {cart:o&&o.cart?c.cart+(c.cart?'\n':'')+o.cart:c.cart, lab:o&&o.lab?c.lab+(c.lab?'\n':'')+o.lab:c.lab};
+}
+
+const uid=()=>Math.random().toString(36).slice(2,9)+Date.now().toString(36).slice(-3);
+const mkStep=(name,cart,lab)=>({id:uid(),name:name,cart:cart||'',lab:lab||'',note:{cart:[],lab:[]}});
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad=n=>String(n).padStart(2,'0');
+const fmt=t=>{const d=new Date(t);return d.getFullYear()+'/'+pad(d.getMonth()+1)+'/'+pad(d.getDate())+' '+pad(d.getHours())+':'+pad(d.getMinutes());};
+
+function newCase(name){
+  return {id:uid(),name:name,baseApplied:true,steps:TEMPLATE_STEPS.map(n=>{const b=baseFor(name,n);return mkStep(n,b.cart,b.lab);}),memo:[],history:[{t:Date.now(),text:'症例を作成(ベース手順入り)'}]};
+}
+function defaultData(){return {cases:DEFAULT_CASES.map(newCase)};}
+
+/* ---------- 状態の読み込み ---------- */
+let seed;
+try{seed=JSON.parse(document.getElementById('seed').textContent);}catch(e){seed={stamp:0,data:null};}
+let store=null;
+try{store=JSON.parse(localStorage.getItem(LS_KEY));}catch(e){}
+let data,seedStamp;
+let ui={mode:'both',caseId:null};
+try{const u=JSON.parse(localStorage.getItem(LS_UI));if(u)ui=Object.assign(ui,u);}catch(e){}
+
+(function init(){
+  if(!store||!store.data){
+    data=seed.data||defaultData();
+    seedStamp=seed.stamp||0;
+  }else{
+    data=store.data;
+    seedStamp=store.seedStamp||0;
+    if(seed.data&&seed.stamp>seedStamp){
+      if(confirm('配布データが更新されています(' + fmt(seed.stamp) + ')。\n読み込むと、この端末内の編集は上書きされます。読み込みますか?\n(キャンセルすると、この端末のデータを使い続けます)')){
+        data=seed.data;
+      }
+      seedStamp=seed.stamp;
+    }
+  }
+  normalizeData();
+  /* 未編集のひな形症例にだけ、ベース手順を一度だけ自動で入れる */
+  data.cases.forEach(c=>{
+    if(c.baseApplied)return;
+    c.baseApplied=true;
+    const untouched=c.steps.length===TEMPLATE_STEPS.length&&c.steps.every((s,i)=>s.name===TEMPLATE_STEPS[i]&&!s.cart&&!s.lab);
+    if(untouched){
+      c.steps.forEach(s=>{const b=baseFor(c.name,s.name);s.cart=b.cart;s.lab=b.lab;});
+      c.history.unshift({t:Date.now(),text:'ベース手順を入力'});
+    }
+  });
+  save();
+})();
+
+function normalizeData(){
+  if(!Array.isArray(data.inbox))data.inbox=[];
+  data.cases.forEach(c=>c.steps.forEach(s=>{
+    if(!s.note)s.note={cart:[],lab:[]};
+    if(!s.note.cart)s.note.cart=[];
+    if(!s.note.lab)s.note.lab=[];
+  }));
+}
+function save(){try{localStorage.setItem(LS_KEY,JSON.stringify({data:data,seedStamp:seedStamp}));}catch(e){}}
+function saveUI(){try{localStorage.setItem(LS_UI,JSON.stringify(ui));}catch(e){}}
+function curCase(){return data.cases.find(c=>c.id===ui.caseId);}
+function log(c,text){c.history.unshift({t:Date.now(),text:text});if(c.history.length>200)c.history.length=200;}
+
+/* ---------- 描画 ---------- */
+let pasteText='';
+let memoText='';
+try{const d=JSON.parse(localStorage.getItem(LS_DRAFT));if(d){memoText=d.memo||'';pasteText=d.paste||'';}}catch(e){}
+function render(){
+  const app=document.getElementById('app');
+  const c=curCase();
+  if(!c)ui.caseId=null;
+  app.innerHTML=c?caseView(c):listView();
+  app.querySelectorAll('textarea[data-f]').forEach(autosize);
+}
+function autosize(el){el.style.height='auto';el.style.height=Math.max(84,el.scrollHeight+2)+'px';}
+
+function pasteCard(top){
+  const hint=top
+    ?'① メモを貼る → ② 「依頼文をコピー」を押し、Claudeのチャットに貼り付ける → ③ 返ってきた結果を下の反映欄に貼る。どの症例・ステップに入れるかは、Claudeが判断します。患者情報は入れないでください。'
+    :'① メモを貼る → ② 「依頼文をコピー」を押し、Claudeのチャットに貼り付ける → ③ 返ってきた結果を下の反映欄に貼る。患者情報は入れないでください。';
+  const ex=top
+    ?'症例: 心房細動\nステップ: マッピング\nカルト: タグ設定は○○\n補足: Claudeが足した補足(別表示になる)\nラボ: 刺激装置を△△に設定\n(続く行は次の目印まで同じ欄に入る。最初の「症例:」より前の行は、共通・未分類に入る)'
+    :'症例: 心房細動\nステップ: マッピング\nカルト: タグ設定は○○\n補足: Claudeが足した補足(別表示になる)\nラボ: 刺激装置を△△に設定\n(続く行は次の目印まで同じ欄に入る。目印のない行は未分類メモ。「症例:」を省くと、開いている症例に入る)';
+  return '<section class="card"><h2>'+(top?'メモを入れる(症例はClaudeが判断)':'Claudeに整理してもらう')+'</h2>'+
+  '<div class="hint">'+hint+'</div>'+
+  '<textarea id="memo" class="paste" oninput="setMemo(this.value)" placeholder="① 自由にメモを貼る">'+esc(memoText)+'</textarea>'+
+  '<div class="row"><button class="primary" id="openbtn" onclick="openClaude()">② コピーしてClaudeを開く</button><button id="copybtn" onclick="copyPrompt()">コピーのみ</button></div>'+
+  '<textarea id="paste" class="paste" oninput="setPaste(this.value)" placeholder="③ Claudeの返答を貼る(目印を付けて直接書いてもよい)">'+esc(pasteText)+'</textarea>'+
+  '<div class="row"><button class="primary" onclick="previewPaste()">プレビュー</button>'+(data.lastBatch?'<button onclick="undoLast()">直前の反映を取り消す</button>':'')+'</div>'+
+  '<details><summary>目印の書き方</summary><pre class="ex">'+esc(ex)+'</pre></details></section>';
+}
+
+function stepOpts(c){return c?c.steps.map(s=>'<option value="'+s.id+'">'+esc(s.name)+'</option>').join(''):'';}
+function inboxHTML(){
+  const items=data.inbox||[];
+  const head='<section class="card"><h2>共通・未分類 ('+items.length+')</h2>';
+  if(!items.length)return head+'<div class="hint">どの症例にも当てはまらないメモが、ここに入ります。</div></section>';
+  const copts=data.cases.map(c=>'<option value="'+c.id+'">'+esc(c.name)+'</option>').join('');
+  const sopts=stepOpts(data.cases[0]);
+  return head+items.map(x=>'<div class="memo"><div class="mtext">'+esc(x.text)+'<small>'+fmt(x.t)+'</small></div>'+
+    '<div class="mact"><select id="ic-'+x.id+'" onchange="inboxCase(\''+x.id+'\')">'+copts+'</select><select id="is-'+x.id+'">'+sopts+'</select><select id="if-'+x.id+'"><option value="cart">カルト</option><option value="lab">ラボ</option></select>'+
+    '<button onclick="inboxMove(\''+x.id+'\')">移す</button><button class="ghost danger" onclick="inboxDel(\''+x.id+'\')">削除</button></div></div>').join('')+'</section>';
+}
+function inboxCase(id){
+  const c=data.cases.find(x=>x.id===document.getElementById('ic-'+id).value);
+  document.getElementById('is-'+id).innerHTML=stepOpts(c);
+}
+function inboxMove(id){
+  const x=data.inbox.find(m=>m.id===id);if(!x)return;
+  const c=data.cases.find(v=>v.id===document.getElementById('ic-'+id).value);if(!c)return;
+  const s=c.steps.find(v=>v.id===document.getElementById('is-'+id).value);if(!s)return;
+  const f=document.getElementById('if-'+id).value;
+  s[f]=(s[f]?s[f]+'\n':'')+x.text;
+  data.inbox=data.inbox.filter(m=>m.id!==id);
+  log(c,'共通・未分類メモを「'+s.name+'」の'+(f==='cart'?'カルト欄':'ラボ欄')+'へ移動');save();render();
+}
+function inboxDel(id){
+  if(!confirm('このメモを削除しますか?'))return;
+  data.inbox=data.inbox.filter(m=>m.id!==id);save();render();
+}
+
+function listView(){
+  return '<header class="top"><h1>アブレーション虎の巻</h1><span class="ver">'+APP_VERSION+'</span></header>'+
+  '<main><div class="grid">'+
+  data.cases.map(c=>'<button class="case-card" onclick="openCase(\''+c.id+'\')"><b>'+esc(c.name)+'</b><small>ステップ '+c.steps.length+' ・ 未分類メモ '+c.memo.length+'</small><small>更新 '+fmt(c.history[0]?c.history[0].t:Date.now())+'</small></button>').join('')+
+  '<button class="case-card add" onclick="addCase()">+ 症例を追加</button></div>'+
+  pasteCard(true)+
+  inboxHTML()+
+  '<section class="card"><h2>Claudeを開く先</h2>'+
+  '<input id="curl" type="url" value="'+esc((function(){try{return localStorage.getItem(LS_URL)||'';}catch(e){return '';}})())+'" placeholder="空欄: 新しいチャット(https://claude.ai/new)" onchange="saveClaudeURL(this.value)" style="width:100%;font:inherit;padding:8px 10px;border:1px solid var(--line);border-radius:8px">'+
+  '<div class="hint">毎回新しいチャットを作りたくないときは、虎の巻用チャットのURL(https://claude.ai/chat/…)を貼ってください。iPhoneでは、Claudeのアプリではなくブラウザが開く場合があります。</div></section>'+
+  '<section class="card"><h2>バックアップ</h2>'+
+  '<div class="row"><button onclick="exportJSON()">JSON書き出し</button><button onclick="document.getElementById(\'jsonfile\').click()">JSON読み込み</button>'+
+  '<input id="jsonfile" type="file" accept=".json,application/json" style="display:none" onchange="importJSON(this)"></div>'+
+  '<div class="hint">データはこのブラウザにだけ保存されています。ブラウザのデータを消す前や、端末を替える前に書き出してください。</div></section></main>';
+}
+
+function caseView(c){
+  const m=ui.mode;
+  return '<header class="top"><button class="ghost" onclick="closeCase()">← 一覧</button><h1 onclick="renameCase()" title="タップで名前変更">'+esc(c.name)+' ✎</h1><span class="ver">'+APP_VERSION+'</span></header>'+
+  '<div class="modebar"><div class="seg">'+[['cart','カルト'],['lab','ラボ'],['both','両方']].map(a=>'<button class="'+(m===a[0]?'on':'')+'" onclick="setMode(\''+a[0]+'\')">'+a[1]+'</button>').join('')+'</div></div>'+
+  '<main>'+
+  c.steps.map((s,i)=>stepHTML(s,i,c.steps.length)).join('')+
+  '<button class="add-step" onclick="addStep()">+ ステップを追加</button>'+
+  pasteCard(false)+
+  '<section class="card"><h2>未分類メモ ('+c.memo.length+')</h2>'+memoHTML(c)+'</section>'+
+  '<details class="card"><summary>更新履歴 ('+c.history.length+')</summary><ul class="hist">'+c.history.map(h=>'<li><time>'+fmt(h.t)+'</time>'+esc(h.text)+'</li>').join('')+'</ul></details>'+
+  '<section class="card"><button class="danger" onclick="deleteCase()">この症例を削除</button></section>'+
+  '</main>';
+}
+
+function stepHTML(s,i,n){
+  const m=ui.mode;
+  const col=(f,label)=>'<div class="col '+f+'"><label>'+label+'</label><textarea data-s="'+s.id+'" data-f="'+f+'" oninput="onField(this)" placeholder="'+label+'の操作・設定・注意点">'+esc(s[f])+'</textarea>'+notesHTML(s,f)+'</div>';
+  let body='';
+  if(m==='cart')body=col('cart','カルト');
+  else if(m==='lab')body=col('lab','ラボ');
+  else body=col('cart','カルト')+col('lab','ラボ');
+  return '<div class="step"><div class="step-head"><span class="step-no">'+(i+1)+'</span>'+
+    '<input value="'+esc(s.name)+'" data-s="'+s.id+'" onchange="onStepName(this)">'+
+    '<button class="ghost" '+(i===0?'disabled':'')+' onclick="moveStep(\''+s.id+'\',-1)">↑</button>'+
+    '<button class="ghost" '+(i===n-1?'disabled':'')+' onclick="moveStep(\''+s.id+'\',1)">↓</button>'+
+    '<button class="ghost danger" onclick="delStep(\''+s.id+'\')">削除</button></div>'+
+    '<div class="cols '+m+'">'+body+'</div></div>';
+}
+
+function memoHTML(c){
+  if(!c.memo.length)return '<div class="hint">未分類メモはありません。</div>';
+  const opts=c.steps.map(s=>'<option value="'+s.id+'">'+esc(s.name)+'</option>').join('');
+  return c.memo.map(x=>'<div class="memo"><div class="mtext">'+esc(x.text)+'<small>'+fmt(x.t)+'</small></div>'+
+    '<div class="mact"><select id="ms-'+x.id+'">'+opts+'</select><select id="mf-'+x.id+'"><option value="cart">カルト</option><option value="lab">ラボ</option></select>'+
+    '<button onclick="moveMemo(\''+x.id+'\')">移す</button><button class="ghost danger" onclick="delMemo(\''+x.id+'\')">削除</button></div></div>').join('');
+}
+
+/* ---------- 症例操作 ---------- */
+function openCase(id){ui.caseId=id;saveUI();render();window.scrollTo(0,0);}
+function closeCase(){ui.caseId=null;saveUI();render();window.scrollTo(0,0);}
+function setMode(m){ui.mode=m;saveUI();render();}
+function addCase(){
+  const name=(prompt('症例名を入力')||'').trim();
+  if(!name)return;
+  data.cases.push(newCase(name));save();render();
+}
+function renameCase(){
+  const c=curCase();const name=(prompt('症例名を変更',c.name)||'').trim();
+  if(!name||name===c.name)return;
+  log(c,'症例名を「'+c.name+'」から「'+name+'」に変更');c.name=name;save();render();
+}
+function deleteCase(){
+  const c=curCase();
+  if(!confirm('症例「'+c.name+'」を削除します。元に戻せません。よろしいですか?'))return;
+  data.cases=data.cases.filter(x=>x.id!==c.id);ui.caseId=null;saveUI();save();render();
+}
+
+/* ---------- ステップ操作 ---------- */
+const editTimers={};
+function logEdit(label){
+  clearTimeout(editTimers[label]);
+  editTimers[label]=setTimeout(()=>{
+    const c=curCase();if(!c)return;
+    const text=label+'を編集';const last=c.history[0];
+    if(last&&last.text===text&&Date.now()-last.t<600000)last.t=Date.now();
+    else log(c,text);
+    save();
+  },1500);
+}
+function onField(el){
+  const c=curCase();const s=c.steps.find(x=>x.id===el.dataset.s);
+  s[el.dataset.f]=el.value;autosize(el);save();
+  logEdit('「'+s.name+'」の'+(el.dataset.f==='cart'?'カルト欄':'ラボ欄'));
+}
+function onStepName(el){
+  const c=curCase();const s=c.steps.find(x=>x.id===el.dataset.s);
+  const name=el.value.trim();
+  if(!name){el.value=s.name;return;}
+  if(name!==s.name){log(c,'ステップ名を「'+s.name+'」から「'+name+'」に変更');s.name=name;save();render();}
+}
+function addStep(){
+  const c=curCase();const name=(prompt('ステップ名を入力')||'').trim();
+  if(!name)return;
+  c.steps.push(mkStep(name,'',''));log(c,'ステップ「'+name+'」を追加');save();render();
+}
+function moveStep(id,d){
+  const c=curCase();const i=c.steps.findIndex(x=>x.id===id);const j=i+d;
+  if(j<0||j>=c.steps.length)return;
+  const t=c.steps[i];c.steps[i]=c.steps[j];c.steps[j]=t;
+  log(c,'ステップ「'+t.name+'」を並べ替え');save();render();
+}
+function delStep(id){
+  const c=curCase();const s=c.steps.find(x=>x.id===id);
+  const filled=(s.cart||s.lab);
+  if(!confirm('ステップ「'+s.name+'」を削除します。'+(filled?'入力済みの内容も消えます。':'')+'よろしいですか?'))return;
+  c.steps=c.steps.filter(x=>x.id!==id);log(c,'ステップ「'+s.name+'」を削除');save();render();
+}
+
+/* ---------- 未分類メモ ---------- */
+function moveMemo(id){
+  const c=curCase();const x=c.memo.find(m=>m.id===id);
+  const sid=document.getElementById('ms-'+id).value;const f=document.getElementById('mf-'+id).value;
+  const s=c.steps.find(v=>v.id===sid);if(!s)return;
+  s[f]=(s[f]?s[f]+'\n':'')+x.text;
+  c.memo=c.memo.filter(m=>m.id!==id);
+  log(c,'未分類メモを「'+s.name+'」の'+(f==='cart'?'カルト欄':'ラボ欄')+'へ移動');save();render();
+}
+function delMemo(id){
+  const c=curCase();
+  if(!confirm('このメモを削除しますか?'))return;
+  c.memo=c.memo.filter(m=>m.id!==id);log(c,'未分類メモを削除');save();render();
+}
+
+/* ---------- Claude補足の表示・削除 ---------- */
+function notesHTML(s,f){
+  const arr=(s.note&&s.note[f])||[];
+  return arr.map(n=>'<div class="cnote"><span class="ctag">Claude補足</span><span class="ctext">'+esc(n.text)+'</span><button class="ghost" title="削除" onclick="delNote(\''+s.id+'\',\''+f+'\',\''+n.id+'\')">×</button></div>').join('');
+}
+function delNote(sid,f,nid){
+  const c=curCase();const s=c.steps.find(x=>x.id===sid);if(!s)return;
+  s.note[f]=s.note[f].filter(n=>n.id!==nid);
+  log(c,'Claude補足を削除(「'+s.name+'」の'+(f==='cart'?'カルト':'ラボ')+')');save();render();
+}
+
+/* ---------- 貼り付け解析(症例/ステップ/カルト/ラボ/補足) ---------- */
+/* defaultCase が null のとき、最初の「症例:」より前の行は共通・未分類(inbox)に入る */
+function parsePaste(text,defaultCase){
+  const re=/^\s*(症例|ステップ|カルト|ラボ|補足)\s*[:：]\s*(.*)$/;
+  const cases=new Map();
+  const inbox=[];
+  const getCase=n=>{if(!cases.has(n))cases.set(n,{name:n,groups:new Map(),memo:[]});return cases.get(n);};
+  const getGroup=(cs,n)=>{if(!cs.groups.has(n))cs.groups.set(n,{name:n,cart:[],lab:[],ncart:[],nlab:[]});return cs.groups.get(n);};
+  let cn=defaultCase,step=null,field=null,kind=null;
+  const toMemo=line=>{if(cn===null||cn===undefined)inbox.push(line);else getCase(cn).memo.push(line);};
+  text.replace(/\r/g,'').split('\n').forEach(raw=>{
+    const line=raw.trim();
+    if(!line)return;
+    const m=line.match(re);
+    if(m){
+      const k=m[1],v=m[2].trim();
+      if(k==='症例'){
+        if(!v){toMemo(line);return;}
+        cn=v;step=null;field=null;kind=null;getCase(cn);return;
+      }
+      if(cn===null||cn===undefined){toMemo(line);return;}
+      if(k==='ステップ'){
+        if(!v){toMemo(line);return;}
+        step=v;field=null;kind=null;getGroup(getCase(cn),v);return;
+      }
+      if(k==='カルト'||k==='ラボ'){
+        if(!step){toMemo(line);field=null;kind=null;return;}
+        field=(k==='カルト')?'cart':'lab';kind='user';
+        if(v)getGroup(getCase(cn),step)[field].push(v);
+        return;
+      }
+      if(k==='補足'){
+        if(!step||!field){toMemo(line);return;}
+        kind='note';
+        getGroup(getCase(cn),step)['n'+field].push(v);
+        return;
+      }
+    }
+    if(step&&field){
+      const g=getGroup(getCase(cn),step);
+      if(kind==='note'){
+        const arr=g['n'+field];
+        arr[arr.length-1]=arr[arr.length-1]?arr[arr.length-1]+'\n'+line:line;
+      }else g[field].push(line);
+    }else{
+      toMemo(line);
+    }
+  });
+  const out=[];
+  cases.forEach(cs=>{
+    const groups=[...cs.groups.values()];
+    groups.forEach(g=>{g.ncart=g.ncart.filter(x=>x);g.nlab=g.nlab.filter(x=>x);});
+    if(groups.length||cs.memo.length)out.push({name:cs.name,groups:groups,memo:cs.memo});
+  });
+  return {cases:out,inbox:inbox};
+}
+
+let pending=null;
+function previewPaste(){
+  const c=curCase();const text=document.getElementById('paste').value;pasteText=text;
+  if(!text.trim()){alert('反映するテキストがありません');return;}
+  const res=parsePaste(text,c?c.name:null);
+  const list=res.cases;
+  list.forEach(cs=>{
+    const ex=data.cases.find(x=>x.name===cs.name);cs.isNew=!ex;
+    cs.groups.forEach(g=>{g.isNew=!ex||!ex.steps.some(s=>s.name===g.name);});
+  });
+  pending={cases:list,inbox:res.inbox};
+  let total=0;
+  let html='<div class="modal-body"><h2 style="margin-top:0">振り分け結果の確認</h2>';
+  list.forEach(cs=>{
+    html+='<h3 style="margin:12px 0 6px">症例: '+esc(cs.name)+'<span class="badge '+(cs.isNew?'new':'add')+'">'+(cs.isNew?'新規症例':'既存')+'</span></h3>';
+    cs.groups.forEach(g=>{
+      html+='<div class="pv-step"><b>'+esc(g.name)+'<span class="badge '+(g.isNew?'new':'add')+'">'+(g.isNew?'新規ステップ':'追記')+'</span></b>';
+      const row=(arr,cls,tag)=>arr.forEach(l=>{total++;html+='<div class="pv-line '+cls+'"><span class="pv-tag '+cls+'">'+tag+'</span>'+esc(l)+'</div>';});
+      row(g.cart,'cart','カルト');row(g.ncart,'note','カルト・Claude補足');
+      row(g.lab,'lab','ラボ');row(g.nlab,'note','ラボ・Claude補足');
+      html+='</div>';
+    });
+    if(cs.memo.length){
+      html+='<div class="pv-step"><b>未分類メモ<span class="badge add">'+cs.memo.length+'行</span></b>';
+      cs.memo.forEach(l=>{total++;html+='<div class="pv-line memo">'+esc(l)+'</div>';});
+      html+='</div>';
+    }
+  });
+  if(res.inbox.length){
+    html+='<h3 style="margin:12px 0 6px">共通・未分類</h3><div class="pv-step"><b>トップの共通・未分類へ<span class="badge add">'+res.inbox.length+'行</span></b>';
+    res.inbox.forEach(l=>{total++;html+='<div class="pv-line memo">'+esc(l)+'</div>';});
+    html+='</div>';
+  }
+  if(!total)html+='<div class="hint">反映できる内容がありません。</div>';
+  html+='</div><div class="modal-foot"><button onclick="closeModal()">戻る</button>'+(total?'<button class="primary" onclick="applyPaste()">反映する</button>':'')+'</div>';
+  showModal(html);
+}
+
+function applyPaste(){
+  const p=pending;if(!p)return;
+  const now=Date.now();const batch={t:now,entries:[],inbox:[]};
+  p.cases.forEach(cs=>{
+    let c=data.cases.find(x=>x.name===cs.name);const created=!c;
+    if(!c){c=newCase(cs.name);data.cases.push(c);}
+    const en={caseId:c.id,created:created,appended:[],notes:[],memo:[],steps:[]};
+    let nu=0,nn=0,ns=0;
+    cs.groups.forEach(g=>{
+      let s=c.steps.find(x=>x.name===g.name);
+      if(!s){s=mkStep(g.name,'','');c.steps.push(s);en.steps.push(s.id);ns++;}
+      ['cart','lab'].forEach(f=>{
+        if(g[f].length){
+          const t=g[f].join('\n');
+          s[f]=(s[f]?s[f]+'\n':'')+t;
+          en.appended.push({stepId:s.id,field:f,text:t});nu+=g[f].length;
+        }
+        g['n'+f].forEach(x=>{const nid=uid();s.note[f].push({id:nid,text:x,t:now});en.notes.push(nid);nn++;});
+      });
+    });
+    cs.memo.forEach(l=>{const id=uid();c.memo.push({id:id,t:now,text:l});en.memo.push(id);});
+    log(c,'貼り付け反映: 追記'+nu+'行、Claude補足'+nn+'件、新規ステップ'+ns+'、未分類メモ'+cs.memo.length+'行');
+    batch.entries.push(en);
+  });
+  p.inbox.forEach(l=>{const id=uid();data.inbox.push({id:id,t:now,text:l});batch.inbox.push(id);});
+  data.lastBatch=batch;
+  pending=null;pasteText='';memoText='';saveDraft();
+  save();closeModal();render();
+}
+
+function undoLast(){
+  const b=data.lastBatch;if(!b)return;
+  if(!confirm('直前の貼り付け反映('+fmt(b.t)+')を取り消します。よろしいですか?'))return;
+  b.entries.forEach(en=>{
+    const c=data.cases.find(x=>x.id===en.caseId);if(!c)return;
+    if(en.created){data.cases=data.cases.filter(x=>x.id!==c.id);return;}
+    en.appended.forEach(a=>{
+      const s=c.steps.find(x=>x.id===a.stepId);if(!s)return;
+      const t1='\n'+a.text;
+      if(s[a.field].indexOf(t1)>=0)s[a.field]=s[a.field].replace(t1,'');
+      else if(s[a.field].indexOf(a.text)>=0)s[a.field]=s[a.field].replace(a.text,'');
+    });
+    c.steps.forEach(s=>{['cart','lab'].forEach(f=>{s.note[f]=s.note[f].filter(n=>en.notes.indexOf(n.id)<0);});});
+    c.memo=c.memo.filter(m=>en.memo.indexOf(m.id)<0);
+    c.steps=c.steps.filter(s=>!(en.steps.indexOf(s.id)>=0&&!s.cart&&!s.lab&&!s.note.cart.length&&!s.note.lab.length));
+    log(c,'貼り付け反映を取り消し');
+  });
+  const ib=b.inbox||[];
+  data.inbox=data.inbox.filter(x=>ib.indexOf(x.id)<0);
+  data.lastBatch=null;
+  if(ui.caseId&&!curCase()){ui.caseId=null;saveUI();}
+  save();render();
+}
+
+/* ---------- Claudeへの依頼文 ---------- */
+function buildPrompt(c,memo){
+  const stepsText=cs=>cs.steps.map(s=>'■'+s.name+'\nカルト: '+(s.cart?s.cart.replace(/\n/g,'\n  '):'(なし)')+'\nラボ: '+(s.lab?s.lab.replace(/\n/g,'\n  '):'(なし)')).join('\n');
+  const top=!c;
+  const rules=[
+    '1. メモを症例・ステップ・カルト/ラボに仕分ける。'+(top?'どの症例に属するかは、あなたが判断する。':'')+'メモの意味は変えない。複数の症例に関係する内容は、それぞれの症例に書く。',
+    '2. 必要な補足・修正は「補足:」の行に書く。確かでないこと、機器の具体的な設定値や数値は推測で書かず、「施設ルールで確認」と書く。',
+    '3. 【現在の内容】と重複する内容は出力しない。',
+    '4. 患者情報は書かない。',
+    '5. 症例名・ステップ名は、【症例一覧】と【現在の内容】の名前に合わせる。合うものがないときだけ新しい名前を使う。',
+    '6. 出力は、下の形式のコードブロック1つだけ。前置きや解説は書かない。'
+  ];
+  if(top)rules.push('7. どの症例にも当てはまらない内容は、「症例:」の行を書かずに、出力の先頭に1行ずつ書く(共通・未分類に入る)。');
+  const current=top
+    ?'■現在の内容(全症例)\n'+data.cases.map(x=>'【症例: '+x.name+'】\n'+stepsText(x)).join('\n\n')
+    :'■現在の内容(症例: '+c.name+')\n'+stepsText(c);
+  return [
+    'あなたは、臨床工学技士がアブレーション業務(ラボ操作・カルト操作)で使う、自分専用の「虎の巻」の整理係です。',
+    '下の【メモ】を整理し、指定の形式だけで出力してください。',
+    '',
+    '■ルール'
+  ].concat(rules,[
+    '',
+    '■出力形式',
+    '症例: 症例名',
+    'ステップ: ステップ名',
+    'カルト: カルト側の内容(複数行可)',
+    '補足: そのカルト側の内容への補足・修正(複数行可)',
+    'ラボ: ラボ側の内容(複数行可)',
+    '補足: そのラボ側の内容への補足・修正(複数行可)',
+    '(「補足:」は直前の「カルト:」または「ラボ:」に付く。補足だけのときも、先に「カルト:」または「ラボ:」の行を置く。別の症例は「症例:」から書き直す)',
+    '',
+    '■症例一覧',
+    data.cases.map(x=>x.name).join('、'),
+    '',
+    current,
+    '',
+    '■メモ',
+    memo
+  ]).join('\n');
+}
+/* ---------- 下書き保持・Claudeを開く ---------- */
+function saveDraft(){try{localStorage.setItem(LS_DRAFT,JSON.stringify({memo:memoText,paste:pasteText}));}catch(e){}}
+function setMemo(v){memoText=v;saveDraft();}
+function setPaste(v){pasteText=v;saveDraft();}
+
+function claudeURL(){
+  let u='';
+  try{u=localStorage.getItem(LS_URL)||'';}catch(e){}
+  return /^https:\/\/claude\.ai\//.test(u)?u:'https://claude.ai/new';
+}
+function saveClaudeURL(v){
+  v=(v||'').trim();
+  if(v&&!/^https:\/\/claude\.ai\//.test(v)){alert('https://claude.ai/ で始まるURLを入れてください');render();return;}
+  try{if(v)localStorage.setItem(LS_URL,v);else localStorage.removeItem(LS_URL);}catch(e){}
+  render();
+}
+
+function flashBtn(id,text){
+  const b=document.getElementById(id);if(!b)return;
+  const o=b.textContent;b.textContent=text;
+  setTimeout(()=>{const x=document.getElementById(id);if(x)x.textContent=o;},1800);
+}
+/* 依頼文を作る(メモが空なら null) */
+function promptText(){
+  const c=curCase();const el=document.getElementById('memo');
+  memoText=el.value;saveDraft();
+  if(!memoText.trim()){alert('先に①のメモ欄に、メモを貼ってください');return null;}
+  return buildPrompt(c,memoText.trim());
+}
+/* クリック直後に同期でコピー(iPhoneでも動かすため) */
+function copySync(text){
+  let ok=false;
+  try{
+    const ta=document.createElement('textarea');
+    ta.value=text;ta.setAttribute('readonly','');
+    ta.style.cssText='position:fixed;top:0;left:0;opacity:0;font-size:16px';
+    document.body.appendChild(ta);ta.focus();ta.select();ta.setSelectionRange(0,text.length);
+    ok=document.execCommand('copy');
+    ta.remove();
+  }catch(e){ok=false;}
+  return ok;
+}
+function promptModal(text,url){
+  showModal('<div class="modal-body"><h2 style="margin-top:0">依頼文</h2><div class="hint">自動でコピーできませんでした。全選択してコピーし、Claudeに貼り付けてください。</div><textarea id="pr" class="paste" style="height:300px" readonly>'+esc(text)+'</textarea></div><div class="modal-foot"><button class="primary" onclick="var t=document.getElementById(\'pr\');t.select();t.setSelectionRange(0,t.value.length);document.execCommand(\'copy\');closeModal()">コピーして閉じる</button>'+(url?'<a class="btnlink" href="'+esc(url)+'" target="_blank" rel="noopener">Claudeを開く</a>':'')+'<button onclick="closeModal()">閉じる</button></div>');
+}
+function openModal(url){
+  showModal('<div class="modal-body"><h2 style="margin-top:0">コピーしました</h2><div class="hint">下のボタンでClaudeを開き、入力欄に貼り付けて送信してください。</div></div><div class="modal-foot"><a class="btnlink primary" href="'+esc(url)+'" target="_blank" rel="noopener" onclick="closeModal()">Claudeを開く</a><button onclick="closeModal()">閉じる</button></div>');
+}
+function copyPrompt(){
+  const text=promptText();if(!text)return;
+  if(copySync(text)){flashBtn('copybtn','コピーしました');return;}
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(()=>flashBtn('copybtn','コピーしました'),()=>promptModal(text,''));
+  }else promptModal(text,'');
+}
+function openClaude(){
+  const text=promptText();if(!text)return;
+  const url=claudeURL();
+  const ok=copySync(text);
+  const w=window.open(url,'_blank');
+  if(ok){
+    if(w)flashBtn('openbtn','コピーして開きました');else openModal(url);
+    return;
+  }
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(()=>{if(!w)openModal(url);},()=>promptModal(text,url));
+  }else promptModal(text,url);
+}
+
+function showModal(inner){document.getElementById('modal-root').innerHTML='<div class="modal-bg" onclick="if(event.target===this)closeModal()"><div class="modal">'+inner+'</div></div>';}
+function closeModal(){document.getElementById('modal-root').innerHTML='';}
+
+/* ---------- 書き出し・読み込み ---------- */
+function download(name,type,content){
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([content],{type:type}));
+  a.download=name;document.body.appendChild(a);a.click();
+  setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);
+}
+function exportJSON(){
+  download('ablation_manual_'+fmt(Date.now()).replace(/[\/: ]/g,'')+'.json','application/json',JSON.stringify({data:data},null,1));
+}
+function importJSON(input){
+  const f=input.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{
+    try{
+      const o=JSON.parse(r.result);const d=o.data||o;
+      if(!d||!Array.isArray(d.cases))throw new Error('形式が違います');
+      if(!confirm('この端末のデータをJSONの内容で置き換えます。よろしいですか?'))return;
+      data=d;normalizeData();ui.caseId=null;saveUI();save();render();
+    }catch(e){alert('読み込めませんでした: '+e.message);}
+  };
+  r.readAsText(f);input.value='';
+}
+
+render();
+</script>
+</body>
+</html>
